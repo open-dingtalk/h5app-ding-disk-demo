@@ -1,7 +1,11 @@
 import axios from 'axios';
 import React from 'react';
 import './App.css';
-import * as dd from "dingtalk-jsapi";
+import "antd/dist/antd.min.css";
+import {Button, message, Upload, Checkbox} from "antd";
+import {UploadOutlined} from '@ant-design/icons';
+
+// import * as dd from "dingtalk-jsapi";
 
 class App extends React.Component {
     constructor(props) {
@@ -9,25 +13,194 @@ class App extends React.Component {
         this.state = {
             //内网穿透工具介绍:
             // https://developers.dingtalk.com/document/resourcedownload/http-intranet-penetration?pnamespace=app
-            domain: "",
+            domain: '',
             corpId: '',
             authCode: '',
             userId: '',
-            userName: ''
+            userName: '',
+            unionId: '',
+            spaceId: '',
+            deptId: '',
+            showType: 0,
+            deptList:[],
+            targetDeptList:[]
         }
     }
 
     render() {
+        let data = {
+            unionId: this.state.unionId,
+            spaceId: this.state.spaceId,
+            type: "image"
+        }
         if (this.state.userId === '') {
             // 免登操作
             this.login();
         }
         return (
-            // 主编写模块
             <div className="App">
-
+                {this.state.showType === 0 && (
+                    <div>
+                        <h2>钉盘功能</h2>
+                        <p>
+                            <Button onClick={() => this.createSpace()}>创建钉盘空间</Button>
+                        </p>
+                        <p>
+                            <Upload
+                                action="/biz/upload"
+                                data={data}
+                                name="file"
+                                onChange={this.uploadFile}
+                            >
+                                <Button icon={<UploadOutlined/>}>上传图片到钉盘空间</Button>
+                            </Upload>
+                        </p>
+                        <p>
+                            <Button onClick={(e) => this.showDept(e, 1)}>授权部门该文件查看/可下载权限</Button>
+                        </p>
+                        <p>
+                            <Button onClick={() => this.download()}>下载钉盘空间的图片</Button>
+                        </p>
+                    </div>
+                )}
+                {this.state.showType === 1 && (
+                    <div>
+                        {this.state.deptList.map((item, i) => (
+                            <p key={i}>
+                                <Checkbox
+                                    value={item.deptId}
+                                    name={item.name}
+                                    onChange={(e) => this.addDeptToList(e)}>
+                                    {item.name}
+                                </Checkbox>
+                                <span onClick={(e) => this.showDept(e, item.deptId)} >
+                                    ⇢
+                                </span>
+                            </p>
+                        ))}
+                        <Button onClick={() => this.addPermissions()}>为选中部门添加查看/可下载权限</Button><br/>
+                        <a onClick={() => this.setState({showType: 0})}>←返回</a>
+                    </div>
+                )}
             </div>
         );
+    }
+
+    addDeptToList(e){
+        let list = this.state.targetDeptList
+        let deptId = e.target.value;
+        console.log("------deptId------" , deptId)
+        if(list.indexOf(deptId) === -1){
+            list.push(deptId)
+            this.setState({
+                targetDeptList: list,
+            })
+        }
+        console.log("------list------" , list)
+
+    }
+
+    download() {
+        let data = {
+            fileId: sessionStorage.getItem("fileId"),
+            spaceId: this.state.spaceId,
+            unionId: this.state.unionId
+        }
+        axios.post(this.state.domain + "/biz/download", JSON.stringify(data),
+            {headers: {"Content-Type": "application/json"}})
+            .then(res => {
+                if (res.data.success) {
+                    message.success("下载成功！")
+                } else {
+                    message.error(res.data.errorMsg);
+                }
+            }).catch(error => {
+            alert("download err, " + JSON.stringify(error))
+        })
+    }
+
+    showDept(e, deptId) {
+        axios.post(this.state.domain + "/biz/getDeptList", JSON.stringify(deptId),
+            {headers: {"Content-Type": "application/json"}})
+            .then(res => {
+                if (res.data.success) {
+                    this.setState({
+                        deptList: res.data.data,
+                        showType: 1
+                    })
+                } else {
+                    message.error(res.data.errorMsg);
+                }
+            }).catch(error => {
+            alert("showDept err, " + JSON.stringify(error))
+        })
+    }
+
+    addPermissions() {
+        let data = {
+            fileId: sessionStorage.getItem("fileId"),
+            spaceId: this.state.spaceId,
+            userId: this.state.userId,
+            unionId: this.state.unionId,
+            deptIds: this.state.targetDeptList.join(",")
+        }
+        axios.post(this.state.domain + "/biz/addPermissions", JSON.stringify(data),
+            {headers: {"Content-Type": "application/json"}})
+            .then(res => {
+                if (res.data.success) {
+                    this.setState({
+                        deptList:[],
+                        targetDeptList:[],
+                        showType: 0
+                    })
+                    message.success("添加权限成功！")
+                } else {
+                    message.error(res.data.errorMsg);
+                }
+            }).catch(error => {
+            alert("addPermissions err, " + JSON.stringify(error))
+        })
+    }
+
+    uploadFile(info) {
+        if (info.file.status !== 'uploading') {
+            console.log(info.file, info.fileList);
+        }
+        if (info.file.response !== null && info.file.response !== undefined && info.file.response.success === true) {
+            sessionStorage.setItem("fileId", info.file.response.data.fileId);
+            console.log("fileId: " + info.file.response.data.fileId);
+            message.success(`${info.file.name} 文件上传成功`);
+        } else if (info.file.response !== null && info.file.response !== undefined && info.file.response.success === false) {
+            message.error(`${info.file.response.errorMsg}`);
+        }
+    }
+
+    chooseFile(e) {
+        let value = e.target.value;
+        this.state({
+            file: value
+        })
+    }
+
+    createSpace() {
+        let data = {
+            unionId: this.state.unionId,
+            spaceName: "一号空间"
+        }
+        axios.post(this.state.domain + "/biz/createSpace", JSON.stringify(data),
+            {headers: {"Content-Type": "application/json"}})
+            .then(res => {
+                if (res.data.success) {
+                    this.setState({
+                        spaceId: res.data.data.spaceId
+                    })
+                    message.success("创建钉盘空间成功！")
+                } else {
+                    message.error(res.data.errorMsg);
+                }
+            }).catch(error => {
+            alert("createSpace err, " + JSON.stringify(error))
+        })
     }
 
     //登录-获取corpId
@@ -49,15 +222,17 @@ class App extends React.Component {
             corpId: corpId,//企业 corpId
             onSuccess: function (res) {
                 // 调用成功时回调
-                axios.get(_this.state.domain + "/login?authCode=" + _this.state.authCode
+                axios.get(_this.state.domain + "/login?authCode=" + res.code
                 ).then(res => {
                     if (res && res.data.success) {
                         let userId = res.data.data.userId;
                         let userName = res.data.data.userName;
+                        let unionId = res.data.data.unionId;
                         alert('登录成功，你好' + userName);
                         _this.setState({
                             userId: userId,
-                            userName: userName
+                            userName: userName,
+                            unionId: unionId
                         })
                     } else {
                         alert("login failed --->" + JSON.stringify(res));

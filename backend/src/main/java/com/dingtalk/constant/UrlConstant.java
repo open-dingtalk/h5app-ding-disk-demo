@@ -26,4 +26,8 @@ public class UrlConstant {
      * 获取指定用户子部门 url
      */
     public static final String LIST_PARENT_BY_USER = "https://oapi.dingtalk.com/topapi/v2/department/listparentbyuser";
+    /**
+     * 获取部门列表 url
+     */
+    public static final String DEPT_LIST_SUB = "https://oapi.dingtalk.com/topapi/v2/department/listsub";
 }

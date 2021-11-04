@@ -1,11 +1,13 @@
 package com.dingtalk.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.dingtalk.api.response.OapiV2UserGetResponse;
 import com.dingtalk.config.AppConfig;
 import com.dingtalk.model.RpcServiceResult;
 import com.dingtalk.service.UserManager;
 import com.taobao.api.ApiException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -21,6 +23,10 @@ public class LoginController {
 
     @Resource
     private UserManager userManager;
+
+
+    @Autowired
+    private AppConfig appConfig;
 
     /**
      * 欢迎页面, 检查后端服务是否启动
@@ -48,7 +54,8 @@ public class LoginController {
             Map<String, Object> resultMap = new HashMap<>();
             resultMap.put("userId", userGetResponse.getUserid());
             resultMap.put("userName", userGetResponse.getName());
-
+            resultMap.put("unionId", userGetResponse.getUnionid());
+            log.info("login user:{}", JSON.toJSONString(resultMap));
             return RpcServiceResult.getSuccessResult(resultMap);
         } catch (ApiException e) {
             e.printStackTrace();
@@ -65,6 +72,6 @@ public class LoginController {
      */
     @RequestMapping(value = "/getCorpId", method = RequestMethod.GET)
     public String getCorpId() {
-        return AppConfig.getCorpId();
+        return appConfig.getCorpId();
     }
 }
