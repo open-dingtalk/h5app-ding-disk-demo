@@ -28,6 +28,7 @@ import com.dingtalk.api.response.OapiV2DepartmentListparentbyuserResponse;
 import com.dingtalk.api.response.OapiV2DepartmentListsubResponse;
 import com.dingtalk.config.AppConfig;
 import com.dingtalk.constant.UrlConstant;
+import com.dingtalk.model.RpcServiceResult;
 import com.taobao.api.ApiException;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
@@ -37,8 +38,11 @@ import okio.Sink;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -175,49 +179,6 @@ public class BizManager {
         }
         return null;
     }
-
-    /**
-     * 下载文件
-     *
-     * @param url
-     * @param path
-     * @param headers
-     */
-    public void downloadFile(String url, String path, Map<String, String> headers) {
-        OkHttpClient client = new OkHttpClient();
-        Request request = new Request.Builder()
-                .url(url)
-                .headers(Headers.of(headers))
-                .build();
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                e.printStackTrace();
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                Sink sink = null;
-                BufferedSink bufferedSink = null;
-                try {
-                    File dest = new File(path);
-                    sink = Okio.sink(dest);
-                    bufferedSink = Okio.buffer(sink);
-                    long l = bufferedSink.writeAll(response.body().source());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                } finally {
-                    if (bufferedSink != null) {
-                        bufferedSink.close();
-                    }
-                    if (sink != null) {
-                        sink.close();
-                    }
-                }
-            }
-        });
-    }
-
 
     /**
      * 为部门成员添加"查看/可下载"权限
@@ -359,7 +320,6 @@ public class BizManager {
             req.setDeptId(deptId);
             req.setLanguage("zh_CN");
             OapiV2DepartmentListsubResponse rsp = client.execute(req, accessToken);
-            System.out.println(rsp.getBody());
             log.info("getDeptList rsp body:{}", rsp.getBody());
             if (rsp.getErrcode() == 0) {
                 return rsp.getResult();

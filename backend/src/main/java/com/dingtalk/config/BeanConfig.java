@@ -6,6 +6,10 @@ import com.aliyun.dingboot.common.token.TokenManagerWithCache;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue;
+
 @Configuration
 public class BeanConfig {
 
@@ -17,5 +21,10 @@ public class BeanConfig {
     @Bean
     public DingTalkUser dingTalkUser() {
         return new DingTalkUser();
+    }
+
+    @Bean
+    public BlockingQueue<Long> blockingQueue() {
+        return new LinkedBlockingQueue<>();
     }
 }

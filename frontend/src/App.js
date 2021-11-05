@@ -4,8 +4,7 @@ import './App.css';
 import "antd/dist/antd.min.css";
 import {Button, message, Upload, Checkbox} from "antd";
 import {UploadOutlined} from '@ant-design/icons';
-
-// import * as dd from "dingtalk-jsapi";
+import * as dd from "dingtalk-jsapi";
 
 class App extends React.Component {
     constructor(props) {
@@ -38,50 +37,68 @@ class App extends React.Component {
             this.login();
         }
         return (
-            <div className="App">
-                {this.state.showType === 0 && (
-                    <div>
-                        <h2>钉盘功能</h2>
-                        <p>
-                            <Button onClick={() => this.createSpace()}>创建钉盘空间</Button>
-                        </p>
-                        <p>
-                            <Upload
-                                action="/biz/upload"
-                                data={data}
-                                name="file"
-                                onChange={this.uploadFile}
-                            >
-                                <Button icon={<UploadOutlined/>}>上传图片到钉盘空间</Button>
-                            </Upload>
-                        </p>
-                        <p>
-                            <Button onClick={(e) => this.showDept(e, 1)}>授权部门该文件查看/可下载权限</Button>
-                        </p>
-                        <p>
-                            <Button onClick={() => this.download()}>下载钉盘空间的图片</Button>
-                        </p>
-                    </div>
-                )}
-                {this.state.showType === 1 && (
-                    <div>
-                        {this.state.deptList.map((item, i) => (
-                            <p key={i}>
-                                <Checkbox
-                                    value={item.deptId}
-                                    name={item.name}
-                                    onChange={(e) => this.addDeptToList(e)}>
-                                    {item.name}
-                                </Checkbox>
-                                <span onClick={(e) => this.showDept(e, item.deptId)} >
+            <div className="content">
+                <div className="header">
+                    <img
+                        src="https://img.alicdn.com/imgextra/i3/O1CN01Mpftes1gwqxuL0ZQE_!!6000000004207-2-tps-240-240.png"
+                        className="headImg"
+                    />
+                    钉钉 demo
+                </div>
+                <div className="App">
+                    {this.state.showType === 0 && (
+                        <div>
+                            <h2>钉盘功能</h2>
+                            <p>
+                                <Button onClick={() => this.createSpace()}>创建钉盘空间</Button>
+                            </p>
+                            <p>
+                                <Upload
+                                    action="/biz/upload"
+                                    data={data}
+                                    name="file"
+                                    onChange={this.uploadFile}
+                                >
+                                    <Button icon={<UploadOutlined/>}>上传图片到钉盘空间</Button>
+                                </Upload>
+                            </p>
+                            <p>
+                                <Button onClick={(e) => this.showDept(e, 1)}>授权部门该文件查看/可下载权限</Button>
+                            </p>
+                            <p>
+                                <Button onClick={() => this.download()}>下载钉盘空间的图片</Button>
+                            </p>
+                        </div>
+                    )}
+                    {this.state.showType === 1 && (
+                        <div>
+                            <h2>部门列表</h2>
+                            {this.state.deptList.map((item, i) => (
+                                <p key={i}>
+                                    <Checkbox
+                                        value={item.deptId}
+                                        name={item.name}
+                                        onChange={(e) => this.addDeptToList(e)}>
+                                        {item.name}
+                                    </Checkbox>
+                                    <span onClick={(e) => this.showDept(e, item.deptId)} >
                                     ⇢
                                 </span>
-                            </p>
-                        ))}
-                        <Button onClick={() => this.addPermissions()}>为选中部门添加查看/可下载权限</Button><br/>
-                        <a onClick={() => this.setState({showType: 0})}>←返回</a>
-                    </div>
-                )}
+                                </p>
+                            ))}
+                            <Button onClick={() => this.addPermissions()}>为选中部门添加查看/可下载权限</Button><br/>
+                            <a onClick={() => this.setState({showType: 0})}>←返回</a>
+                        </div>
+                    )}
+                    {this.state.showType === 2 && (
+                        <div>
+                            <h2>创建钉盘空间</h2>
+                            <input type="text" name={""}/>
+                            <br/>
+                            <a onClick={() => this.setState({showType: 0})}>←返回</a>
+                        </div>
+                    )}
+                </div>
             </div>
         );
     }
@@ -97,26 +114,13 @@ class App extends React.Component {
             })
         }
         console.log("------list------" , list)
-
     }
 
     download() {
-        let data = {
-            fileId: sessionStorage.getItem("fileId"),
-            spaceId: this.state.spaceId,
-            unionId: this.state.unionId
-        }
-        axios.post(this.state.domain + "/biz/download", JSON.stringify(data),
-            {headers: {"Content-Type": "application/json"}})
-            .then(res => {
-                if (res.data.success) {
-                    message.success("下载成功！")
-                } else {
-                    message.error(res.data.errorMsg);
-                }
-            }).catch(error => {
-            alert("download err, " + JSON.stringify(error))
-        })
+        const fileId = sessionStorage.getItem("fileId");
+        const spaceId = this.state.spaceId;
+        const unionId = this.state.unionId;
+        window.open(this.state.domain + "/biz/download?fileId=" + fileId + "&spaceId=" + spaceId + "&unionId=" + unionId);
     }
 
     showDept(e, deptId) {
