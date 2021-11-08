@@ -2,7 +2,7 @@ import axios from "axios"
 import React from "react"
 import "./App.css"
 import "antd/dist/antd.min.css"
-import { Button, message, Upload, Checkbox } from "antd"
+import { Button, message, Upload, Checkbox, Radio, Space } from "antd"
 import { UploadOutlined } from "@ant-design/icons"
 import * as dd from "dingtalk-jsapi"
 
@@ -20,9 +20,10 @@ class App extends React.Component {
       unionId: "",
       spaceId: "",
       deptId: "",
-      showType: 0,
+      showType: 1,
       deptList: [],
-      targetDeptList: [],
+      targetDeptList: "",
+      fileId: "",
     }
   }
 
@@ -59,7 +60,7 @@ class App extends React.Component {
                   action="/biz/upload"
                   data={data}
                   name="file"
-                  onChange={this.uploadFile}
+                  onChange={(e) => this.uploadFile(e)}
                 >
                   <Button type="primary" icon={<UploadOutlined />}>
                     上传图片到钉盘空间
@@ -81,18 +82,39 @@ class App extends React.Component {
           {this.state.showType === 1 && (
             <div>
               <h2>部门列表</h2>
-              {this.state.deptList.map((item, i) => (
+              {console.log(this.state.addDeptToList, "000000")}
+              <Radio.Group
+                onChange={(e) => this.addDeptToList(e)}
+                value={this.state.targetDeptList}
+              >
+                <Space direction="vertical">
+                  {/* this.state.deptList */}
+                  {[
+                    { deptId: 1, name: "11111" },
+                    { deptId: 2, name: "22222" },
+                  ].map((item, i) => (
+                    <Radio value={item.deptId} key={i}>
+                      {item.name}
+                      {/* span 标签是做的 部门如果还有下一级时候的处理 */}
+                      {/* {<span onClick={(e) => this.showDept(e, item.deptId)}>⇢</span>} */}
+                    </Radio>
+                  ))}
+                </Space>
+              </Radio.Group>
+              {/* {this.state.deptList.map((item, i) => (
                 <p key={i}>
-                  <Checkbox
+                  <checkBox
                     value={item.deptId}
                     name={item.name}
                     onChange={(e) => this.addDeptToList(e)}
                   >
                     {item.name}
-                  </Checkbox>
+                  </checkBox>
                   <span onClick={(e) => this.showDept(e, item.deptId)}>⇢</span>
                 </p>
-              ))}
+              ))} */}
+              <br />
+              <br />
               <Button type="primary" onClick={() => this.addPermissions()}>
                 为选中部门添加查看/可下载权限
               </Button>
@@ -114,20 +136,21 @@ class App extends React.Component {
   }
 
   addDeptToList(e) {
-    let list = this.state.targetDeptList
-    let deptId = e.target.value
-    console.log("------deptId------", deptId)
-    if (list.indexOf(deptId) === -1) {
-      list.push(deptId)
-      this.setState({
-        targetDeptList: list,
-      })
-    }
-    console.log("------list------", list)
+    console.log(e.target.value, "=====")
+    this.setState({ targetDeptList: e.target.value })
+    // 以下做的处理是为了方便多选情况
+    // let list = this.state.targetDeptList
+    // let deptId = e.target.value
+    // if (list.indexOf(deptId) === -1) {
+    //   list.push(deptId)
+    //   this.setState({
+    //     targetDeptList: list,
+    //   })
+    // }
   }
 
   download() {
-    const fileId = sessionStorage.getItem("fileId")
+    const fileId = this.state.fileId
     const spaceId = this.state.spaceId
     const unionId = this.state.unionId
     window.open(
@@ -162,12 +185,21 @@ class App extends React.Component {
   }
 
   addPermissions() {
+    const fileId = this.state.fileId
+    const spaceId = this.state.spaceId
+    if (!fileId || !spaceId) {
+      message.error("请先上传图片/创建空间")
+    }
+    if (!this.state.targetDeptList) {
+      message.error("请先选择部门")
+      return
+    }
     let data = {
-      fileId: sessionStorage.getItem("fileId"),
-      spaceId: this.state.spaceId,
+      fileId,
+      spaceId,
       userId: this.state.userId,
       unionId: this.state.unionId,
-      deptIds: this.state.targetDeptList.join(","),
+      deptIds: this.state.targetDeptList,
     }
     axios
       .post(this.state.domain + "/biz/addPermissions", JSON.stringify(data), {
@@ -177,7 +209,7 @@ class App extends React.Component {
         if (res.data.success) {
           this.setState({
             deptList: [],
-            targetDeptList: [],
+            targetDeptList: "",
             showType: 0,
           })
           message.success("添加权限成功！")
@@ -199,8 +231,9 @@ class App extends React.Component {
       info.file.response !== undefined &&
       info.file.response.success === true
     ) {
-      sessionStorage.setItem("fileId", info.file.response.data.fileId)
-      console.log("fileId: " + info.file.response.data.fileId)
+      this.setState({ fileId: info.file.response.data.fileId })
+      //   sessionStorage.setItem("fileId", info.file.response.data.fileId)
+      //   console.log("fileId: " + info.file.response.data.fileId)
       message.success(`${info.file.name} 文件上传成功`)
     } else if (
       info.file.response !== null &&
@@ -270,7 +303,7 @@ class App extends React.Component {
               let userId = res.data.data.userId
               let userName = res.data.data.userName
               let unionId = res.data.data.unionId
-              alert("登录成功，你好" + userName)
+              message.success("登录成功，你好" + userName)
               _this.setState({
                 userId: userId,
                 userName: userName,
