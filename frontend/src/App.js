@@ -20,7 +20,7 @@ class App extends React.Component {
       unionId: "",
       spaceId: "",
       deptId: "",
-      showType: 1,
+      showType: 0,
       deptList: [],
       targetDeptList: "",
       fileId: "",
@@ -69,7 +69,7 @@ class App extends React.Component {
               </p>
               <p>
                 <Button type="primary" onClick={(e) => this.showDept(e, 1)}>
-                  授权部门该文件查看/可下载权限
+                  授权部门该图片查看/可下载权限
                 </Button>
               </p>
               <p>
@@ -88,11 +88,7 @@ class App extends React.Component {
                 value={this.state.targetDeptList}
               >
                 <Space direction="vertical">
-                  {/* this.state.deptList */}
-                  {[
-                    { deptId: 1, name: "11111" },
-                    { deptId: 2, name: "22222" },
-                  ].map((item, i) => (
+                  {this.state.deptList.map((item, i) => (
                     <Radio value={item.deptId} key={i}>
                       {item.name}
                       {/* span 标签是做的 部门如果还有下一级时候的处理 */}
@@ -188,7 +184,8 @@ class App extends React.Component {
     const fileId = this.state.fileId
     const spaceId = this.state.spaceId
     if (!fileId || !spaceId) {
-      message.error("请先上传图片/创建空间")
+      message.error("请先创建空间并上传图片")
+      return
     }
     if (!this.state.targetDeptList) {
       message.error("请先选择部门")
