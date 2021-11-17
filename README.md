@@ -1,11 +1,10 @@
-# XXXXDemo
+# 钉盘功能-Demo
 
-> - 此demo主要展示XXXX相关功能，包括创建XXXX。
+> - 此demo主要展示钉盘相关功能，包括创建钉盘空间、上传文件到钉盘、为部门授权钉盘文件、下载钉盘文件等。
 > - 项目结构
-    >   - rear-end：后端模块，springboot构建，功能接口功能包括：XXXX。
->   - front-end：前端模块，react构建，场景功能包括：XXXX。
+    >   - rear-end：后端模块，springboot构建，功能接口功能包括：新建钉盘空间、获取文件上传信息、上传文件、添加文件、获取部门列表、添加权限、获取文件下载信息、下载文件等。
+>   - front-end：前端模块，react构建，场景功能包括：jsapi获取免登授权码、展示页面、上传文件、展示部门、下载文件等。
 >
-> （介绍demo的功能，请自行发挥）
 
 
 
@@ -21,7 +20,7 @@
 
    配置开发管理，参考文档：https://developers.dingtalk.com/document/app/configure-orgapp
 
-    - **此处配置“应用首页地址”需公网地址，若无公网ip，可使用钉钉内网穿透工具：**
+    - **此处配置“应用首页地址”和“PC端首页地址”需公网地址，若无公网ip，可使用钉钉内网穿透工具：**
 
       https://developers.dingtalk.com/document/resourcedownload/http-intranet-penetration
 
@@ -33,7 +32,7 @@
 
 本demo使用接口相关权限：
 
-"A权限"、"B权限"（请填写该demo需要申请的权限）
+“成员信息读取权限”、“通讯录部门信息读权限”、“钉盘应用盘空间写权限”、“钉盘应用文件写权限”、“钉盘应用授权信息写权限”、“钉盘应用文件下载信息读权限”、“钉盘应用文件上传信息读权限”
 
 ![image-20210706172027870](https://img.alicdn.com/imgextra/i3/O1CN016WCr6428wDdBhkWi6_!!6000000007996-2-tps-1358-571.png)
 
@@ -44,7 +43,7 @@
 **下载本项目至本地**
 
 ```shell
-git clone https://github.com/open-dingtalk/h5app-XXX.git
+git clone https://github.com/open-dingtalk/h5app-ding-disk-demo.git
 ```
 
 ### 获取相应参数
@@ -85,11 +84,36 @@ npm run build
 
 ### 页面展示
 
-（页面截图/功能效果截图）
+![](https://img.alicdn.com/imgextra/i2/O1CN014PdBxs1hXx38ahiGM_!!6000000004288-2-tps-300-278.png)
+
+主页面，点击创建空间
+
+![](https://img.alicdn.com/imgextra/i2/O1CN018HEf5c20vHvgcI25f_!!6000000006911-2-tps-299-238.png)
+
+点击上传图片按钮，选择图片
+
+![](https://img.alicdn.com/imgextra/i1/O1CN01qCodzj1Mb3oAvLe0B_!!6000000001452-2-tps-300-87.png)
+
+ 上传完成
+
+ ![](https://img.alicdn.com/imgextra/i2/O1CN018WrPiE1gPQ3M6AEjp_!!6000000004134-2-tps-300-189.png)
+
+点击授权按钮展示部门列表，选择部门进行授权
+
+![](https://img.alicdn.com/imgextra/i2/O1CN01HA0Tkd1a92C1StxeK_!!6000000003286-2-tps-249-52.png)
+
+点击下载按钮，跳转到浏览器下载钉盘的图片
+
+
 
 ### **参考文档**
 
-1. 获取企业内部应用access_token，文档链接：https://developers.dingtalk.com/document/app/obtain-orgapp-token?spm=ding_open_doc.document.0.0.938247e54bE13v#topic-1936350
-2. XXX
-
-（请完善此处的文档链接）
+1. 获取企业内部应用access_token，文档链接：https://developers.dingtalk.com/document/app/obtain-orgapp-token
+2. 新建空间，文档链接：https://developers.dingtalk.com/document/app/new-space
+3. 获取文件上传信息，文档链接：https://developers.dingtalk.com/document/app/obtain-upload-information
+4. 文件上传流程，文档链接：https://developers.dingtalk.com/document/app/example-of-the-file-upload-sdk
+5. 添加文件，文档链接：https://developers.dingtalk.com/document/app/add-file
+6. 获取部门列表，文档链接：https://developers.dingtalk.com/document/app/obtain-the-department-list-v2
+7. 添加权限，文档链接：https://developers.dingtalk.com/document/app/add-permissions
+8. 获取文件下载信息，文档链接：https://developers.dingtalk.com/document/app/obtain-download-file-info
+9. 文件下载流程，文档链接：https://developers.dingtalk.com/document/app/file-download-process
